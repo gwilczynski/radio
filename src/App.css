@@ -43,6 +43,12 @@ body {
   z-index: 100;
 }
 
+.app-bar__logo {
+  height: 32px;
+  width: auto;
+  margin-right: 8px;
+}
+
 .app-bar__title {
   font-size: 22px;
   font-weight: 400;

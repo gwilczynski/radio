@@ -1,6 +1,7 @@
 import { useRef, useState, useEffect } from 'react'
 import './App.css'
 import { stations } from './data/stations.js'
+import lunaremLogo from './assets/lunarem_radio_light.svg'
 
 function WaveAnimation() {
   return (
@@ -145,7 +146,8 @@ export default function App() {
       <audio ref={audioRef} />
 
       <header className="app-bar">
-        <h1 className="app-bar__title">Radio</h1>
+        <img src={lunaremLogo} alt="Lunarem Radio" className="app-bar__logo" />
+        <h1 className="app-bar__title">Lunarem Radio</h1>
       </header>
 
       <main className="app-main">
