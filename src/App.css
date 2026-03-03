@@ -352,3 +352,27 @@ body {
   position: relative;
   z-index: 1;
 }
+
+/* ===== Mini Player Nav Buttons (Prev/Next) ===== */
+.mini-player-nav-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--md-on-surface-variant);
+  transition: background 200ms;
+}
+
+.mini-player-nav-btn:hover {
+  background: color-mix(in srgb, var(--md-on-surface) 8%, transparent);
+}
+
+.mini-player-nav-btn svg {
+  fill: currentColor;
+  width: 24px;
+  height: 24px;
+}

@@ -60,7 +60,23 @@ function StationCard({ station, isActive, isPlaying, onSelect }) {
   )
 }
 
-function MiniPlayer({ station, isPlaying, onPlayPause, onVolumeChange, volume, visible }) {
+function IconSkipPrev() {
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/>
+    </svg>
+  )
+}
+
+function IconSkipNext() {
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/>
+    </svg>
+  )
+}
+
+function MiniPlayer({ station, isPlaying, onPlayPause, onVolumeChange, volume, visible, onPrev, onNext }) {
   if (!station) return null
 
   return (
@@ -88,12 +104,18 @@ function MiniPlayer({ station, isPlaying, onPlayPause, onVolumeChange, volume, v
             style={{ '--vol': `${Math.round(volume * 100)}%` }}
           />
         </div>
+        <button className="mini-player-nav-btn" onClick={onPrev} aria-label="Previous station">
+          <IconSkipPrev />
+        </button>
         <button
           className="fab"
           onClick={onPlayPause}
           aria-label={isPlaying ? 'Pause' : 'Play'}
         >
           {isPlaying ? <IconPause /> : <IconPlay />}
+        </button>
+        <button className="mini-player-nav-btn" onClick={onNext} aria-label="Next station">
+          <IconSkipNext />
         </button>
       </div>
     </div>
@@ -135,6 +157,20 @@ export default function App() {
     setIsPlaying(p => !p)
   }
 
+  function handlePrevStation() {
+    const idx = stations.findIndex(s => s.id === currentStation?.id)
+    const prev = stations[(idx - 1 + stations.length) % stations.length]
+    setCurrentStation(prev)
+    setIsPlaying(true)
+  }
+
+  function handleNextStation() {
+    const idx = stations.findIndex(s => s.id === currentStation?.id)
+    const next = stations[(idx + 1) % stations.length]
+    setCurrentStation(next)
+    setIsPlaying(true)
+  }
+
   function handleVolumeChange(e) {
     const v = parseFloat(e.target.value)
     setVolume(v)
@@ -171,6 +207,8 @@ export default function App() {
         onVolumeChange={handleVolumeChange}
         volume={volume}
         visible={!!currentStation}
+        onPrev={handlePrevStation}
+        onNext={handleNextStation}
       />
     </>
   )
