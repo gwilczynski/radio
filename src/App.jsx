@@ -135,27 +135,6 @@ const audioRef = useRef(null)
     setIsPlaying(p => !p)
   }
 
-  useEffect(() => {
-    if (!currentStation) return
-    function handleKeyDown(e) {
-      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return
-      if (e.key === 'ArrowLeft' || e.key === 'MediaTrackPrevious') {
-        const idx = stations.findIndex(s => s.id === currentStation.id)
-        setCurrentStation(stations[(idx - 1 + stations.length) % stations.length])
-        setIsPlaying(true)
-      } else if (e.key === 'ArrowRight' || e.key === 'MediaTrackNext') {
-        const idx = stations.findIndex(s => s.id === currentStation.id)
-        setCurrentStation(stations[(idx + 1) % stations.length])
-        setIsPlaying(true)
-      } else if (e.key === ' ' || e.key === 'MediaPlayPause') {
-        e.preventDefault()
-        setIsPlaying(p => !p)
-      }
-    }
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [currentStation])
-
   function handlePrevStation() {
     const idx = stations.findIndex(s => s.id === currentStation?.id)
     const prev = stations[(idx - 1 + stations.length) % stations.length]
