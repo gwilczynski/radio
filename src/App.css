@@ -258,56 +258,6 @@ body {
   flex-shrink: 0;
 }
 
-/* ===== Volume Control ===== */
-.volume-control {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  color: var(--md-on-surface-variant);
-}
-
-.volume-slider {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 80px;
-  height: 4px;
-  border-radius: 2px;
-  background: linear-gradient(
-    to right,
-    var(--md-primary) 0%,
-    var(--md-primary) var(--vol, 80%),
-    var(--md-outline-variant) var(--vol, 80%),
-    var(--md-outline-variant) 100%
-  );
-  outline: none;
-  cursor: pointer;
-}
-
-.volume-slider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: var(--md-primary);
-  cursor: pointer;
-  box-shadow: 0 0 0 0 transparent;
-  transition: box-shadow 0.15s ease;
-}
-
-.volume-slider:focus-visible::-webkit-slider-thumb,
-.volume-slider:hover::-webkit-slider-thumb {
-  box-shadow: 0 0 0 8px color-mix(in srgb, var(--md-primary) 20%, transparent);
-}
-
-.volume-slider::-moz-range-thumb {
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: var(--md-primary);
-  cursor: pointer;
-  border: none;
-}
 
 /* ===== FAB (Play/Pause) ===== */
 .fab {
