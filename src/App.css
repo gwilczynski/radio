@@ -60,10 +60,14 @@ body {
 .station-thumb {
   width: 100%;
   aspect-ratio: 1 / 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 3rem;
+  overflow: hidden;
+}
+
+.station-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 .station-info {
@@ -106,11 +110,15 @@ body {
   width: 44px;
   height: 44px;
   border-radius: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.4rem;
+  overflow: hidden;
   flex-shrink: 0;
+}
+
+.player-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 .player-meta {

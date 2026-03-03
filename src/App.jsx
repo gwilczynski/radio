@@ -1,32 +1,6 @@
 import { useRef, useState, useEffect } from 'react'
 import './App.css'
-
-const STATIONS = [
-  {
-    id: 1,
-    name: 'Groove Salad',
-    genre: 'Ambient / Electronic',
-    streamUrl: 'https://ice1.somafm.com/groovesalad-256-mp3',
-    emoji: '🎵',
-    gradient: 'linear-gradient(135deg, #1a1a4e 0%, #0d3b6e 100%)',
-  },
-  {
-    id: 2,
-    name: 'Lush',
-    genre: 'Chillout',
-    streamUrl: 'https://ice1.somafm.com/lush-128-mp3',
-    emoji: '🌿',
-    gradient: 'linear-gradient(135deg, #0d4e1a 0%, #1a6e3b 100%)',
-  },
-  {
-    id: 3,
-    name: 'Radio Paradise',
-    genre: 'Eclectic Rock',
-    streamUrl: 'https://stream.radioparadise.com/aac-128',
-    emoji: '🎸',
-    gradient: 'linear-gradient(135deg, #4e1a0d 0%, #6e3b1a 100%)',
-  },
-]
+import { stations } from './data/stations'
 
 function StationCard({ station, isActive, onSelect }) {
   return (
@@ -38,12 +12,11 @@ function StationCard({ station, isActive, onSelect }) {
       onKeyDown={e => e.key === 'Enter' && onSelect(station)}
       aria-label={`Play ${station.name}`}
     >
-      <div className="station-thumb" style={{ background: station.gradient }}>
-        {station.emoji}
+      <div className="station-thumb">
+        <img src={station.logoUrl} alt={station.name} />
       </div>
       <div className="station-info">
         <p className="station-name">{station.name}</p>
-        <p className="station-genre">{station.genre}</p>
       </div>
     </div>
   )
@@ -54,12 +27,11 @@ function PlayerBar({ station, isPlaying, onPlayPause, onVolumeChange, volume }) 
 
   return (
     <div className="player-bar">
-      <div className="player-thumb" style={{ background: station.gradient }}>
-        {station.emoji}
+      <div className="player-thumb">
+        <img src={station.logoUrl} alt={station.name} />
       </div>
       <div className="player-meta">
         <p className="player-station-name">{station.name}</p>
-        <p className="player-genre">{station.genre}</p>
       </div>
       <div className="player-controls">
         <button
@@ -138,7 +110,7 @@ export default function App() {
 
       <main className="app-main container-fluid">
         <div className="row g-3">
-          {STATIONS.map(station => (
+          {stations.map(station => (
             <div key={station.id} className="col-12 col-sm-6 col-md-4">
               <StationCard
                 station={station}
