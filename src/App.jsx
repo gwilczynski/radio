@@ -1,8 +1,40 @@
 import { useRef, useState, useEffect } from 'react'
 import './App.css'
-import { stations } from './data/stations'
+import { stations } from './data/stations.js'
 
-function StationCard({ station, isActive, onSelect }) {
+function WaveAnimation() {
+  return (
+    <div className="wave" aria-hidden="true">
+      <span /><span /><span /><span />
+    </div>
+  )
+}
+
+function IconPlay() {
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M8 5v14l11-7z" />
+    </svg>
+  )
+}
+
+function IconPause() {
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+    </svg>
+  )
+}
+
+function IconVolumeUp() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" />
+    </svg>
+  )
+}
+
+function StationCard({ station, isActive, isPlaying, onSelect }) {
   return (
     <div
       className={`station-card${isActive ? ' active' : ''}`}
@@ -14,6 +46,11 @@ function StationCard({ station, isActive, onSelect }) {
     >
       <div className="station-thumb">
         <img src={station.logoUrl} alt={station.name} />
+        {isPlaying && (
+          <div className="station-thumb__overlay">
+            <WaveAnimation />
+          </div>
+        )}
       </div>
       <div className="station-info">
         <p className="station-name">{station.name}</p>
@@ -22,36 +59,41 @@ function StationCard({ station, isActive, onSelect }) {
   )
 }
 
-function PlayerBar({ station, isPlaying, onPlayPause, onVolumeChange, volume }) {
+function MiniPlayer({ station, isPlaying, onPlayPause, onVolumeChange, volume, visible }) {
   if (!station) return null
 
   return (
-    <div className="player-bar">
-      <div className="player-thumb">
+    <div className={`mini-player${visible ? ' mini-player--visible' : ' mini-player--hidden'}`}>
+      <div className="mini-player__thumb">
         <img src={station.logoUrl} alt={station.name} />
       </div>
-      <div className="player-meta">
-        <p className="player-station-name">{station.name}</p>
+      <div className="mini-player__meta">
+        <p className="mini-player__name">{station.name}</p>
+        <p className="mini-player__status">{isPlaying ? 'Live' : 'Paused'}</p>
       </div>
-      <div className="player-controls">
+      {isPlaying && <WaveAnimation />}
+      <div className="mini-player__controls">
+        <div className="volume-control">
+          <IconVolumeUp />
+          <input
+            type="range"
+            className="volume-slider"
+            min="0"
+            max="1"
+            step="0.01"
+            value={volume}
+            onChange={onVolumeChange}
+            aria-label="Volume"
+            style={{ '--vol': `${Math.round(volume * 100)}%` }}
+          />
+        </div>
         <button
-          className="btn-play-pause"
+          className="fab"
           onClick={onPlayPause}
           aria-label={isPlaying ? 'Pause' : 'Play'}
         >
-          {isPlaying ? '⏸' : '▶'}
+          {isPlaying ? <IconPause /> : <IconPlay />}
         </button>
-        <span className="volume-icon">🔊</span>
-        <input
-          type="range"
-          className="volume-slider"
-          min="0"
-          max="1"
-          step="0.01"
-          value={volume}
-          onChange={onVolumeChange}
-          aria-label="Volume"
-        />
       </div>
     </div>
   )
@@ -63,7 +105,6 @@ export default function App() {
   const [volume, setVolume] = useState(0.8)
   const audioRef = useRef(null)
 
-  // Change station: swap src, reload, play
   useEffect(() => {
     if (!currentStation || !audioRef.current) return
     audioRef.current.src = currentStation.streamUrl
@@ -71,7 +112,6 @@ export default function App() {
     audioRef.current.play().catch(() => {})
   }, [currentStation])
 
-  // Toggle play/pause without reloading stream
   useEffect(() => {
     if (!audioRef.current) return
     if (isPlaying) {
@@ -104,30 +144,31 @@ export default function App() {
     <>
       <audio ref={audioRef} />
 
-      <header className="app-header">
-        <h1>Radio</h1>
+      <header className="app-bar">
+        <h1 className="app-bar__title">Radio</h1>
       </header>
 
-      <main className="app-main container-fluid">
-        <div className="row g-3">
+      <main className="app-main">
+        <div className="station-grid">
           {stations.map(station => (
-            <div key={station.id} className="col-12 col-sm-6 col-md-4">
-              <StationCard
-                station={station}
-                isActive={currentStation?.id === station.id}
-                onSelect={handleSelectStation}
-              />
-            </div>
+            <StationCard
+              key={station.id}
+              station={station}
+              isActive={currentStation?.id === station.id}
+              isPlaying={currentStation?.id === station.id && isPlaying}
+              onSelect={handleSelectStation}
+            />
           ))}
         </div>
       </main>
 
-      <PlayerBar
+      <MiniPlayer
         station={currentStation}
         isPlaying={isPlaying}
         onPlayPause={handlePlayPause}
         onVolumeChange={handleVolumeChange}
         volume={volume}
+        visible={!!currentStation}
       />
     </>
   )
