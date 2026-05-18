@@ -62,7 +62,7 @@ body {
 .app-main {
   padding: 16px 12px;
   padding-bottom: calc(96px + 16px);
-  max-width: 600px;
+  max-width: 800px;
   margin: 0 auto;
 }
 
@@ -304,5 +304,12 @@ body {
 .fab svg {
   position: relative;
   z-index: 1;
+}
+
+/* ===== Responsive ===== */
+@media (min-width: 600px) {
+  .station-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
 }
 
