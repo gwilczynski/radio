@@ -23,9 +23,10 @@ A simple web radio player built with React. Browse and stream Polish radio stati
 
 ## Tech Stack
 
-- React 18
-- Vite 6
+- React 19
+- Vite 8
 - Material Design 3 (dark theme, pure CSS)
+- Node.js 24+
 
 ## Development
 
