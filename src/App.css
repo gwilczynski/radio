@@ -62,6 +62,8 @@ body {
 .app-main {
   padding: 16px 12px;
   padding-bottom: calc(96px + 16px);
+  max-width: 600px;
+  margin: 0 auto;
 }
 
 /* ===== Station Grid ===== */
