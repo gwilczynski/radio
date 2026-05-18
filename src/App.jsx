@@ -82,7 +82,51 @@ function MiniPlayer({ station, isPlaying, onPlayPause, visible }) {
 export default function App() {
   const [currentStation, setCurrentStation] = useState(null)
   const [isPlaying, setIsPlaying] = useState(false)
-const audioRef = useRef(null)
+  const audioRef = useRef(null)
+  const retryTimeoutRef = useRef(null)
+
+  function retryPlayback() {
+    const audio = audioRef.current
+    if (!audio || !isPlaying) return
+    audio.src = audio.src
+    audio.load()
+    audio.play().catch(() => {})
+  }
+
+  useEffect(() => {
+    const audio = audioRef.current
+    if (!audio) return
+
+    function handleError() {
+      if (!isPlaying) return
+      clearTimeout(retryTimeoutRef.current)
+      retryTimeoutRef.current = setTimeout(retryPlayback, 2000)
+    }
+
+    function handleStalled() {
+      if (!isPlaying) return
+      clearTimeout(retryTimeoutRef.current)
+      retryTimeoutRef.current = setTimeout(retryPlayback, 3000)
+    }
+
+    audio.addEventListener('error', handleError)
+    audio.addEventListener('stalled', handleStalled)
+    return () => {
+      audio.removeEventListener('error', handleError)
+      audio.removeEventListener('stalled', handleStalled)
+      clearTimeout(retryTimeoutRef.current)
+    }
+  }, [isPlaying])
+
+  useEffect(() => {
+    function handleOnline() {
+      if (isPlaying && audioRef.current) {
+        setTimeout(retryPlayback, 1000)
+      }
+    }
+    window.addEventListener('online', handleOnline)
+    return () => window.removeEventListener('online', handleOnline)
+  }, [isPlaying])
 
   useEffect(() => {
     if (!currentStation || !audioRef.current) return
@@ -97,6 +141,7 @@ const audioRef = useRef(null)
       audioRef.current.play().catch(() => {})
     } else {
       audioRef.current.pause()
+      clearTimeout(retryTimeoutRef.current)
     }
   }, [isPlaying])
 
