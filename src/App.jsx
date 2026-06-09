@@ -41,17 +41,13 @@ function StationCard({ station, isCurrent, isPlaying, isLoading, onToggle }) {
   const playing = isCurrent && isPlaying
   const loading = isCurrent && isLoading
   return (
-    <article
-      className={`card ${playing ? 'card--playing' : ''}`}
-      style={{ '--accent': station.accent }}
-    >
+    <article className={`card ${playing ? 'card--playing' : ''}`}>
       <div className="card__art">
-        <RadioIcon />
+        <img src={station.logoUrl} alt="" className="card__logo" />
         <WaveAnimation active={playing} />
       </div>
       <div className="card__body">
         <h2 className="card__title">{station.name}</h2>
-        <p className="card__genre">{station.genre}</p>
       </div>
       <button
         type="button"
@@ -70,9 +66,9 @@ function MiniPlayer({ station, isPlaying, isLoading, onToggle }) {
   if (!station) return null
   const label = isLoading ? 'Buffering…' : isPlaying ? 'Now playing' : 'Paused'
   return (
-    <div className="mini-player" style={{ '--accent': station.accent }}>
+    <div className="mini-player">
       <div className="mini-player__art">
-        <WaveAnimation active={isPlaying} />
+        <img src={station.logoUrl} alt="" className="mini-player__logo" />
       </div>
       <div className="mini-player__meta">
         <span className="mini-player__label">{label}</span>
@@ -144,7 +140,7 @@ export default function App() {
     setError(null)
     setCurrentId(station.id)
     setIsLoading(true)
-    audio.src = station.url
+    audio.src = station.streamUrl
     const promise = audio.play()
     if (promise && typeof promise.catch === 'function') {
       promise.catch(() => {

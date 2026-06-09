@@ -1,72 +1,31 @@
+import r357Logo from "../assets/357.webp";
+import nsLogo from "../assets/ns.webp";
+import jazzLogo from "../assets/jazz.jpg";
+import rockLogo from "../assets/rock.webp";
+
 export const stations = [
   {
-    id: 'soma-groove-salad',
-    name: 'Groove Salad',
-    genre: 'Ambient / Downtempo',
-    url: 'https://ice2.somafm.com/groovesalad-128-mp3',
-    accent: '#7c4dff',
+    id: "357",
+    name: "Radio 357",
+    logoUrl: r357Logo,
+    streamUrl: "https://stream.rcs.revma.com/ye5kghkgcm0uv",
   },
   {
-    id: 'soma-deep-space-one',
-    name: 'Deep Space One',
-    genre: 'Deep Ambient',
-    url: 'https://ice2.somafm.com/deepspaceone-128-mp3',
-    accent: '#5e6dff',
+    id: "ns",
+    name: "Radio Nowy Świat",
+    logoUrl: nsLogo,
+    streamUrl: "https://stream.rcs.revma.com/ypqt40u0x1zuv",
   },
   {
-    id: 'soma-drone-zone',
-    name: 'Drone Zone',
-    genre: 'Atmospheric',
-    url: 'https://ice2.somafm.com/dronezone-128-mp3',
-    accent: '#ff6db1',
+    id: "jazz",
+    name: "Radio JazzKultura",
+    logoUrl: jazzLogo,
+    streamUrl: "https://stream.radio.co/s1136b59f3/listen",
   },
   {
-    id: 'soma-lush',
-    name: 'Lush',
-    genre: 'Vocals / Mellow',
-    url: 'https://ice2.somafm.com/lush-128-mp3',
-    accent: '#ff9f4a',
+    id: "rock",
+    name: "Radio RockSerwis",
+    logoUrl: rockLogo,
+    streamUrl: "https://stream9.nadaje.com:8003/live",
   },
-  {
-    id: 'soma-indie-pop',
-    name: 'Indie Pop Rocks',
-    genre: 'Indie',
-    url: 'https://ice2.somafm.com/indiepop-128-mp3',
-    accent: '#4adfa1',
-  },
-  {
-    id: 'soma-secret-agent',
-    name: 'Secret Agent',
-    genre: 'Spy / Lounge',
-    url: 'https://ice2.somafm.com/secretagent-128-mp3',
-    accent: '#ffd24a',
-  },
-  {
-    id: 'soma-defcon',
-    name: 'DEF CON Radio',
-    genre: 'Hacker / Electronic',
-    url: 'https://ice2.somafm.com/defcon-128-mp3',
-    accent: '#4ad7ff',
-  },
-  {
-    id: 'soma-fluid',
-    name: 'Fluid',
-    genre: 'Liquid Trap / Future Soul',
-    url: 'https://ice2.somafm.com/fluid-128-mp3',
-    accent: '#b14dff',
-  },
-  {
-    id: 'soma-beatblender',
-    name: 'Beat Blender',
-    genre: 'Deep House',
-    url: 'https://ice2.somafm.com/beatblender-128-mp3',
-    accent: '#ff4a8c',
-  },
-  {
-    id: 'soma-spacestation',
-    name: 'Space Station Soma',
-    genre: 'Tribal / Ambient',
-    url: 'https://ice2.somafm.com/spacestation-128-mp3',
-    accent: '#7affd6',
-  },
-]
+];
