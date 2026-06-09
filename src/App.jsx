@@ -27,6 +27,14 @@ function IconPause() {
   )
 }
 
+function IconSettings() {
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M19.14 12.94a7.43 7.43 0 0 0 .05-.94 7.43 7.43 0 0 0-.05-.94l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.61-.22l-2.39.96a7 7 0 0 0-1.62-.94l-.36-2.54a.5.5 0 0 0-.5-.42h-3.84a.5.5 0 0 0-.5.42l-.36 2.54c-.59.24-1.13.55-1.62.94l-2.39-.96a.5.5 0 0 0-.61.22L2.66 8.84a.5.5 0 0 0 .12.64l2.03 1.58a7.43 7.43 0 0 0-.05.94c0 .32.02.63.05.94l-2.03 1.58a.5.5 0 0 0-.12.64l1.92 3.32a.5.5 0 0 0 .61.22l2.39-.96c.49.39 1.03.7 1.62.94l.36 2.54a.5.5 0 0 0 .5.42h3.84a.5.5 0 0 0 .5-.42l.36-2.54c.59-.24 1.13-.55 1.62-.94l2.39.96a.5.5 0 0 0 .61-.22l1.92-3.32a.5.5 0 0 0-.12-.64l-2.03-1.58zM12 15.5A3.5 3.5 0 1 1 12 8.5a3.5 3.5 0 0 1 0 7z" />
+    </svg>
+  )
+}
+
 
 function StationCard({ station, isActive, isPlaying, onSelect }) {
   return (
@@ -68,6 +76,50 @@ function ThemeSwitcher({ theme, onChange }) {
           onClick={() => onChange(t)}
         />
       ))}
+    </div>
+  )
+}
+
+function SettingsPopover({ theme, onThemeChange }) {
+  const [open, setOpen] = useState(false)
+  const containerRef = useRef(null)
+
+  useEffect(() => {
+    if (!open) return
+    function handleDocClick(e) {
+      if (containerRef.current && !containerRef.current.contains(e.target)) {
+        setOpen(false)
+      }
+    }
+    function handleKey(e) {
+      if (e.key === 'Escape') setOpen(false)
+    }
+    document.addEventListener('mousedown', handleDocClick)
+    document.addEventListener('keydown', handleKey)
+    return () => {
+      document.removeEventListener('mousedown', handleDocClick)
+      document.removeEventListener('keydown', handleKey)
+    }
+  }, [open])
+
+  return (
+    <div className="settings" ref={containerRef}>
+      <button
+        type="button"
+        className="settings__trigger"
+        aria-label="Settings"
+        aria-haspopup="dialog"
+        aria-expanded={open}
+        onClick={() => setOpen(o => !o)}
+      >
+        <IconSettings />
+      </button>
+      {open && (
+        <div className="settings__popover" role="dialog" aria-label="Settings">
+          <p className="settings__label">Theme</p>
+          <ThemeSwitcher theme={theme} onChange={onThemeChange} />
+        </div>
+      )}
     </div>
   )
 }
@@ -258,7 +310,7 @@ export default function App() {
       <header className="app-bar">
         <img src={lunaremLogo} alt="Lunarem Radio" className="app-bar__logo" />
         <h1 className="app-bar__title">Lunarem Radio</h1>
-        <ThemeSwitcher theme={theme} onChange={setTheme} />
+        <SettingsPopover theme={theme} onThemeChange={setTheme} />
       </header>
 
       <main className="app-main">
