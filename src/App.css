@@ -13,7 +13,7 @@
   --md-outline-variant: #49454F;
 
   /* Shape */
-  --shape-card: 16px;
+  --shape-card: 20px;
   --shape-fab: 16px;
   --shape-mini-player: 28px;
 }
@@ -60,17 +60,18 @@ body {
 
 /* ===== Main Content ===== */
 .app-main {
-  padding: 16px 12px;
-  padding-bottom: calc(96px + 16px);
-  max-width: 800px;
+  padding: 24px 20px;
+  padding-bottom: calc(104px + 24px);
+  max-width: 960px;
   margin: 0 auto;
 }
 
 /* ===== Station Grid ===== */
 .station-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 200px));
+  justify-content: center;
+  gap: 16px;
 }
 
 /* ===== Station Card ===== */
@@ -82,6 +83,7 @@ body {
   position: relative;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
   outline: none;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
 }
 
 .station-card::after {
@@ -100,8 +102,8 @@ body {
 }
 
 .station-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
 }
 
 .station-card:focus-visible::after {
@@ -110,6 +112,7 @@ body {
 
 .station-card.active {
   background-color: var(--md-primary-container);
+  box-shadow: 0 0 0 2px var(--md-primary), 0 4px 12px rgba(0, 0, 0, 0.4);
 }
 
 .station-card.active .station-name {
@@ -122,20 +125,26 @@ body {
   aspect-ratio: 1 / 1;
   overflow: hidden;
   position: relative;
+  background-color: var(--md-surface-container-highest);
+  padding: 14%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .station-thumb img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   display: block;
+  image-rendering: -webkit-optimize-contrast;
 }
 
 /* Playing overlay on card art */
 .station-thumb__overlay {
   position: absolute;
   inset: 0;
-  background-color: rgba(0, 0, 0, 0.45);
+  background-color: rgba(0, 0, 0, 0.55);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -143,13 +152,13 @@ body {
 
 /* Station info */
 .station-info {
-  padding: 10px 12px 12px;
+  padding: 16px 18px 18px;
 }
 
 .station-name {
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 500;
-  line-height: 20px;
+  line-height: 24px;
   letter-spacing: 0.1px;
   color: var(--md-on-surface);
   margin: 0;
@@ -188,15 +197,15 @@ body {
 /* ===== Mini Player ===== */
 .mini-player {
   position: fixed;
-  bottom: 12px;
-  left: 12px;
-  right: 12px;
+  bottom: 16px;
+  left: 16px;
+  right: 16px;
   background-color: var(--md-surface-container-highest);
   border-radius: var(--shape-mini-player);
   display: flex;
   align-items: center;
-  padding: 10px;
-  gap: 12px;
+  padding: 12px 14px;
+  gap: 14px;
   z-index: 200;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
@@ -215,17 +224,22 @@ body {
 }
 
 .mini-player__thumb {
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
   overflow: hidden;
   flex-shrink: 0;
+  background-color: var(--md-surface-container-high);
+  padding: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .mini-player__thumb img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   display: block;
 }
 
@@ -309,7 +323,8 @@ body {
 /* ===== Responsive ===== */
 @media (min-width: 600px) {
   .station-grid {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(2, 200px);
+    gap: 24px;
   }
 }
 
