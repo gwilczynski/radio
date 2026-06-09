@@ -126,7 +126,7 @@ body {
   overflow: hidden;
   position: relative;
   background-color: var(--md-surface-container-highest);
-  padding: 14%;
+  padding: 4%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -152,7 +152,7 @@ body {
 
 /* Station info */
 .station-info {
-  padding: 16px 18px 18px;
+  padding: 6px 10px 8px;
 }
 
 .station-name {
@@ -230,7 +230,6 @@ body {
   overflow: hidden;
   flex-shrink: 0;
   background-color: var(--md-surface-container-high);
-  padding: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
