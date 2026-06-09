@@ -126,7 +126,6 @@ body {
   overflow: hidden;
   position: relative;
   background-color: var(--md-surface-container-highest);
-  padding: 4%;
   display: flex;
   align-items: center;
   justify-content: center;
