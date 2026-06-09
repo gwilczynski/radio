@@ -112,6 +112,8 @@ export default function App() {
   const retryTimeoutRef = useRef(null)
   const retryCountRef = useRef(0)
   const isPlayingRef = useRef(false)
+  const currentStationRef = useRef(null)
+  const handlersRef = useRef({ handleNext: () => {}, handlePrev: () => {} })
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme)
@@ -121,6 +123,10 @@ export default function App() {
   useEffect(() => {
     isPlayingRef.current = isPlaying
   }, [isPlaying])
+
+  useEffect(() => {
+    currentStationRef.current = currentStation
+  }, [currentStation])
 
   useEffect(() => {
     const audio = audioRef.current
@@ -144,15 +150,21 @@ export default function App() {
     const handleStalled = () => schedule(3000)
     const handlePlaying = () => { retryCountRef.current = 0 }
     const handleOnline = () => schedule(1000)
+    const handleNativePlay = () => setIsPlaying(true)
+    const handleNativePause = () => setIsPlaying(false)
 
     audio.addEventListener('error', handleError)
     audio.addEventListener('stalled', handleStalled)
     audio.addEventListener('playing', handlePlaying)
+    audio.addEventListener('play', handleNativePlay)
+    audio.addEventListener('pause', handleNativePause)
     window.addEventListener('online', handleOnline)
     return () => {
       audio.removeEventListener('error', handleError)
       audio.removeEventListener('stalled', handleStalled)
       audio.removeEventListener('playing', handlePlaying)
+      audio.removeEventListener('play', handleNativePlay)
+      audio.removeEventListener('pause', handleNativePause)
       window.removeEventListener('online', handleOnline)
       clearTimeout(retryTimeoutRef.current)
     }
@@ -189,6 +201,55 @@ export default function App() {
   function handlePlayPause() {
     setIsPlaying(p => !p)
   }
+
+  function handleNext() {
+    const cur = currentStationRef.current
+    const i = cur ? stations.findIndex(s => s.id === cur.id) : -1
+    const next = stations[(i + 1 + stations.length) % stations.length]
+    handleSelectStation(next)
+  }
+
+  function handlePrev() {
+    const cur = currentStationRef.current
+    const i = cur ? stations.findIndex(s => s.id === cur.id) : 0
+    const prev = stations[(i - 1 + stations.length) % stations.length]
+    handleSelectStation(prev)
+  }
+
+  useEffect(() => {
+    handlersRef.current = { handleNext, handlePrev }
+  })
+
+  useEffect(() => {
+    if (!('mediaSession' in navigator)) return
+    const ms = navigator.mediaSession
+    ms.setActionHandler('play', () => setIsPlaying(true))
+    ms.setActionHandler('pause', () => setIsPlaying(false))
+    ms.setActionHandler('previoustrack', () => handlersRef.current.handlePrev())
+    ms.setActionHandler('nexttrack', () => handlersRef.current.handleNext())
+    return () => {
+      ms.setActionHandler('play', null)
+      ms.setActionHandler('pause', null)
+      ms.setActionHandler('previoustrack', null)
+      ms.setActionHandler('nexttrack', null)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!('mediaSession' in navigator)) return
+    const ms = navigator.mediaSession
+    if (currentStation) {
+      ms.metadata = new MediaMetadata({
+        title: currentStation.name,
+        artist: 'Lunarem Radio',
+        artwork: [{ src: currentStation.logoUrl }],
+      })
+      ms.playbackState = isPlaying ? 'playing' : 'paused'
+    } else {
+      ms.metadata = null
+      ms.playbackState = 'none'
+    }
+  }, [currentStation, isPlaying])
 
   return (
     <>
