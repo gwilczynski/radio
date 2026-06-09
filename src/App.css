@@ -66,6 +66,36 @@
   --md-outline-variant: #3F4943;
 }
 
+/* E — Dusty rose */
+:root[data-theme="e"] {
+  --md-background: #181113;
+  --md-surface-container-low: #1F1619;
+  --md-surface-container-high: #2C2024;
+  --md-surface-container-highest: #392A2F;
+  --md-on-surface: #F0E2E4;
+  --md-on-surface-variant: #D2BFC4;
+  --md-primary: #F4B0BC;
+  --md-on-primary: #4D1226;
+  --md-primary-container: #6E2A3E;
+  --md-on-primary-container: #FFD9DF;
+  --md-outline-variant: #4D3F44;
+}
+
+/* F — Midnight steel */
+:root[data-theme="f"] {
+  --md-background: #0E1218;
+  --md-surface-container-low: #131820;
+  --md-surface-container-high: #1D232D;
+  --md-surface-container-highest: #283040;
+  --md-on-surface: #DDE3EC;
+  --md-on-surface-variant: #BCC5D4;
+  --md-primary: #9CB8FF;
+  --md-on-primary: #07235A;
+  --md-primary-container: #2A4585;
+  --md-on-primary-container: #D9E3FF;
+  --md-outline-variant: #3D4555;
+}
+
 /* ===== Reset / Base ===== */
 *, *::before, *::after {
   box-sizing: border-box;
@@ -231,6 +261,8 @@ body {
 .theme-switcher__swatch--b { background-color: #6FE0D2; }
 .theme-switcher__swatch--c { background-color: #C8B4FF; }
 .theme-switcher__swatch--d { background-color: #8DDBA8; }
+.theme-switcher__swatch--e { background-color: #F4B0BC; }
+.theme-switcher__swatch--f { background-color: #9CB8FF; }
 
 /* ===== Main Content ===== */
 .app-main {

@@ -66,6 +66,8 @@ const THEMES = [
   { id: 'b', name: 'Cool Teal' },
   { id: 'c', name: 'Refined Violet' },
   { id: 'd', name: 'Forest Sage' },
+  { id: 'e', name: 'Dusty Rose' },
+  { id: 'f', name: 'Midnight Steel' },
 ]
 const THEME_IDS = THEMES.map(t => t.id)
 
