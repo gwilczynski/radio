@@ -1,7 +1,5 @@
 import r357Logo from "../assets/357.webp";
 import nsLogo from "../assets/ns.webp";
-import kampusLogo from "../assets/kampus.webp";
-import luzLogo from "../assets/luz.webp";
 import jazzLogo from "../assets/jazz.jpg";
 import rockLogo from "../assets/rock.webp";
 
@@ -17,18 +15,6 @@ export const stations = [
     name: "Radio Nowy Świat",
     logoUrl: nsLogo,
     streamUrl: "https://stream.rcs.revma.com/ypqt40u0x1zuv",
-  },
-  {
-    id: "kampus",
-    name: "Radio Kampus",
-    logoUrl: kampusLogo,
-    streamUrl: "https://stream.radiokampus.fm/kampus",
-  },
-  {
-    id: "luz",
-    name: "Radio Luz",
-    logoUrl: luzLogo,
-    streamUrl: "https://stream.radioluz.pl:8443/luz_hifi.mp3",
   },
   {
     id: "jazz",
