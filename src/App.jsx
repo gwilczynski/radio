@@ -39,7 +39,7 @@ function StationCard({ station, isActive, isPlaying, onSelect }) {
       aria-label={`Play ${station.name}`}
     >
       <div className="station-thumb">
-        <img src={station.logoUrl} alt={station.name} />
+        <img src={station.logoUrl} alt={station.name} loading="lazy" decoding="async" />
         {isPlaying && (
           <div className="station-thumb__overlay">
             <WaveAnimation />
@@ -59,7 +59,7 @@ function MiniPlayer({ station, isPlaying, onPlayPause, visible }) {
   return (
     <div className={`mini-player${visible ? ' mini-player--visible' : ' mini-player--hidden'}`}>
       <div className="mini-player__thumb">
-        <img src={station.logoUrl} alt={station.name} />
+        <img src={station.logoUrl} alt={station.name} loading="lazy" decoding="async" />
       </div>
       <div className="mini-player__meta">
         <p className="mini-player__name">{station.name}</p>
@@ -79,57 +79,60 @@ function MiniPlayer({ station, isPlaying, onPlayPause, visible }) {
   )
 }
 
+const MAX_RETRIES = 5
+const MAX_BACKOFF_MS = 30000
+
 export default function App() {
   const [currentStation, setCurrentStation] = useState(null)
   const [isPlaying, setIsPlaying] = useState(false)
   const audioRef = useRef(null)
   const retryTimeoutRef = useRef(null)
+  const retryCountRef = useRef(0)
+  const isPlayingRef = useRef(false)
 
-  function retryPlayback() {
-    const audio = audioRef.current
-    if (!audio || !isPlaying) return
-    audio.src = audio.src
-    audio.load()
-    audio.play().catch(() => {})
-  }
+  useEffect(() => {
+    isPlayingRef.current = isPlaying
+  }, [isPlaying])
 
   useEffect(() => {
     const audio = audioRef.current
     if (!audio) return
 
-    function handleError() {
-      if (!isPlaying) return
-      clearTimeout(retryTimeoutRef.current)
-      retryTimeoutRef.current = setTimeout(retryPlayback, 2000)
+    function retry() {
+      if (!isPlayingRef.current || retryCountRef.current >= MAX_RETRIES) return
+      retryCountRef.current += 1
+      audio.load()
+      audio.play().catch(() => {})
     }
 
-    function handleStalled() {
-      if (!isPlaying) return
+    function schedule(baseMs) {
+      if (!isPlayingRef.current || retryCountRef.current >= MAX_RETRIES) return
       clearTimeout(retryTimeoutRef.current)
-      retryTimeoutRef.current = setTimeout(retryPlayback, 3000)
+      const delay = Math.min(baseMs * 2 ** retryCountRef.current, MAX_BACKOFF_MS)
+      retryTimeoutRef.current = setTimeout(retry, delay)
     }
+
+    const handleError = () => schedule(2000)
+    const handleStalled = () => schedule(3000)
+    const handlePlaying = () => { retryCountRef.current = 0 }
+    const handleOnline = () => schedule(1000)
 
     audio.addEventListener('error', handleError)
     audio.addEventListener('stalled', handleStalled)
+    audio.addEventListener('playing', handlePlaying)
+    window.addEventListener('online', handleOnline)
     return () => {
       audio.removeEventListener('error', handleError)
       audio.removeEventListener('stalled', handleStalled)
+      audio.removeEventListener('playing', handlePlaying)
+      window.removeEventListener('online', handleOnline)
       clearTimeout(retryTimeoutRef.current)
     }
-  }, [isPlaying])
-
-  useEffect(() => {
-    function handleOnline() {
-      if (isPlaying && audioRef.current) {
-        setTimeout(retryPlayback, 1000)
-      }
-    }
-    window.addEventListener('online', handleOnline)
-    return () => window.removeEventListener('online', handleOnline)
-  }, [isPlaying])
+  }, [])
 
   useEffect(() => {
     if (!currentStation || !audioRef.current) return
+    retryCountRef.current = 0
     audioRef.current.src = currentStation.streamUrl
     audioRef.current.load()
     audioRef.current.play().catch(() => {})
@@ -142,6 +145,7 @@ export default function App() {
     } else {
       audioRef.current.pause()
       clearTimeout(retryTimeoutRef.current)
+      retryCountRef.current = 0
     }
   }, [isPlaying])
 
@@ -160,7 +164,7 @@ export default function App() {
 
   return (
     <>
-      <audio ref={audioRef} />
+      <audio ref={audioRef} preload="none" />
 
       <header className="app-bar">
         <img src={lunaremLogo} alt="Lunarem Radio" className="app-bar__logo" />
