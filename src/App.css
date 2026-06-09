@@ -1,21 +1,69 @@
-/* ===== MD3 Color Tokens (Dark Scheme, Violet seed) ===== */
+/* ===== MD3 Color Tokens (Dark Scheme) ===== */
 :root {
-  --md-background: #1C1B1F;
-  --md-surface-container-low: #1E1D23;
-  --md-surface-container-high: #2B2930;
-  --md-surface-container-highest: #36343B;
-  --md-on-surface: #E6E1E5;
-  --md-on-surface-variant: #CAC4D0;
-  --md-primary: #D0BCFF;
-  --md-on-primary: #381E72;
-  --md-primary-container: #4F378B;
-  --md-on-primary-container: #EADDFF;
-  --md-outline-variant: #49454F;
-
-  /* Shape */
   --shape-card: 20px;
   --shape-fab: 16px;
   --shape-mini-player: 28px;
+}
+
+/* A — Warm vinyl amber */
+:root[data-theme="a"] {
+  --md-background: #14110F;
+  --md-surface-container-low: #1B1815;
+  --md-surface-container-high: #2A2520;
+  --md-surface-container-highest: #36302A;
+  --md-on-surface: #F1E8DC;
+  --md-on-surface-variant: #C9BDAF;
+  --md-primary: #FFB877;
+  --md-on-primary: #4A2800;
+  --md-primary-container: #6A3E10;
+  --md-on-primary-container: #FFDDB8;
+  --md-outline-variant: #4A4239;
+}
+
+/* B — Cool teal/cyan (default) */
+:root,
+:root[data-theme="b"] {
+  --md-background: #0F1416;
+  --md-surface-container-low: #141A1C;
+  --md-surface-container-high: #1F2729;
+  --md-surface-container-highest: #2A3437;
+  --md-on-surface: #DEE4E6;
+  --md-on-surface-variant: #BFC8CB;
+  --md-primary: #6FE0D2;
+  --md-on-primary: #00382F;
+  --md-primary-container: #00513F;
+  --md-on-primary-container: #B5F2E5;
+  --md-outline-variant: #3F484B;
+}
+
+/* C — Refined violet */
+:root[data-theme="c"] {
+  --md-background: #15131A;
+  --md-surface-container-low: #1B1822;
+  --md-surface-container-high: #272431;
+  --md-surface-container-highest: #332F40;
+  --md-on-surface: #ECE6F1;
+  --md-on-surface-variant: #C7BFD2;
+  --md-primary: #C8B4FF;
+  --md-on-primary: #2A0F65;
+  --md-primary-container: #5B3FB0;
+  --md-on-primary-container: #ECDFFF;
+  --md-outline-variant: #4A4456;
+}
+
+/* D — Forest sage */
+:root[data-theme="d"] {
+  --md-background: #0F1411;
+  --md-surface-container-low: #141A16;
+  --md-surface-container-high: #1F2722;
+  --md-surface-container-highest: #2A352D;
+  --md-on-surface: #DFE6E1;
+  --md-on-surface-variant: #BFCBC2;
+  --md-primary: #8DDBA8;
+  --md-on-primary: #003918;
+  --md-primary-container: #00522B;
+  --md-on-primary-container: #B6F2C7;
+  --md-outline-variant: #3F4943;
 }
 
 /* ===== Reset / Base ===== */
@@ -57,6 +105,41 @@ body {
   color: var(--md-on-surface);
   margin: 0;
 }
+
+.theme-switcher {
+  margin-left: auto;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.theme-switcher__swatch {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  padding: 0;
+  outline: none;
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.theme-switcher__swatch:hover {
+  transform: scale(1.1);
+}
+
+.theme-switcher__swatch:focus-visible {
+  border-color: var(--md-on-surface);
+}
+
+.theme-switcher__swatch[aria-pressed="true"] {
+  border-color: var(--md-on-surface);
+}
+
+.theme-switcher__swatch--a { background-color: #FFB877; }
+.theme-switcher__swatch--b { background-color: #6FE0D2; }
+.theme-switcher__swatch--c { background-color: #C8B4FF; }
+.theme-switcher__swatch--d { background-color: #8DDBA8; }
 
 /* ===== Main Content ===== */
 .app-main {

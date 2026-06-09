@@ -53,6 +53,25 @@ function StationCard({ station, isActive, isPlaying, onSelect }) {
   )
 }
 
+const THEMES = ['a', 'b', 'c', 'd']
+
+function ThemeSwitcher({ theme, onChange }) {
+  return (
+    <div className="theme-switcher" role="group" aria-label="Color theme">
+      {THEMES.map(t => (
+        <button
+          key={t}
+          type="button"
+          className={`theme-switcher__swatch theme-switcher__swatch--${t}`}
+          aria-label={`Theme ${t.toUpperCase()}`}
+          aria-pressed={theme === t}
+          onClick={() => onChange(t)}
+        />
+      ))}
+    </div>
+  )
+}
+
 function MiniPlayer({ station, isPlaying, onPlayPause, visible }) {
   if (!station) return null
 
@@ -85,10 +104,19 @@ const MAX_BACKOFF_MS = 30000
 export default function App() {
   const [currentStation, setCurrentStation] = useState(null)
   const [isPlaying, setIsPlaying] = useState(false)
+  const [theme, setTheme] = useState(() => {
+    const stored = typeof window !== 'undefined' && localStorage.getItem('theme')
+    return THEMES.includes(stored) ? stored : 'b'
+  })
   const audioRef = useRef(null)
   const retryTimeoutRef = useRef(null)
   const retryCountRef = useRef(0)
   const isPlayingRef = useRef(false)
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme)
+    localStorage.setItem('theme', theme)
+  }, [theme])
 
   useEffect(() => {
     isPlayingRef.current = isPlaying
@@ -169,6 +197,7 @@ export default function App() {
       <header className="app-bar">
         <img src={lunaremLogo} alt="Lunarem Radio" className="app-bar__logo" />
         <h1 className="app-bar__title">Lunarem Radio</h1>
+        <ThemeSwitcher theme={theme} onChange={setTheme} />
       </header>
 
       <main className="app-main">
