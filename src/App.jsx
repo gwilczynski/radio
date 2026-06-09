@@ -61,20 +61,28 @@ function StationCard({ station, isActive, isPlaying, onSelect }) {
   )
 }
 
-const THEMES = ['a', 'b', 'c', 'd']
+const THEMES = [
+  { id: 'a', name: 'Warm Amber' },
+  { id: 'b', name: 'Cool Teal' },
+  { id: 'c', name: 'Refined Violet' },
+  { id: 'd', name: 'Forest Sage' },
+]
+const THEME_IDS = THEMES.map(t => t.id)
 
 function ThemeSwitcher({ theme, onChange }) {
   return (
     <div className="theme-switcher" role="group" aria-label="Color theme">
       {THEMES.map(t => (
         <button
-          key={t}
+          key={t.id}
           type="button"
-          className={`theme-switcher__swatch theme-switcher__swatch--${t}`}
-          aria-label={`Theme ${t.toUpperCase()}`}
-          aria-pressed={theme === t}
-          onClick={() => onChange(t)}
-        />
+          className="theme-switcher__option"
+          aria-pressed={theme === t.id}
+          onClick={() => onChange(t.id)}
+        >
+          <span className={`theme-switcher__swatch theme-switcher__swatch--${t.id}`} aria-hidden="true" />
+          <span className="theme-switcher__label">{t.name}</span>
+        </button>
       ))}
     </div>
   )
@@ -158,7 +166,7 @@ export default function App() {
   const [isPlaying, setIsPlaying] = useState(false)
   const [theme, setTheme] = useState(() => {
     const stored = typeof window !== 'undefined' && localStorage.getItem('theme')
-    return THEMES.includes(stored) ? stored : 'b'
+    return THEME_IDS.includes(stored) ? stored : 'b'
   })
   const audioRef = useRef(null)
   const retryTimeoutRef = useRef(null)

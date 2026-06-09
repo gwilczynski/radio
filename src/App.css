@@ -115,8 +115,8 @@ body {
   background: transparent;
   border: none;
   color: var(--md-on-surface-variant);
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   display: inline-flex;
   align-items: center;
@@ -124,6 +124,8 @@ body {
   cursor: pointer;
   padding: 0;
   transition: background-color 0.15s ease, color 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 
 .settings__trigger:hover {
@@ -145,7 +147,7 @@ body {
   position: absolute;
   top: calc(100% + 8px);
   right: 0;
-  min-width: 200px;
+  min-width: 240px;
   background-color: var(--md-surface-container-high);
   border-radius: 12px;
   padding: 16px;
@@ -153,7 +155,7 @@ body {
   z-index: 110;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
 }
 
 .settings__label {
@@ -167,31 +169,62 @@ body {
 
 .theme-switcher {
   display: flex;
-  gap: 8px;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.theme-switcher__option {
+  display: flex;
   align-items: center;
+  gap: 12px;
+  width: 100%;
+  background: transparent;
+  border: none;
+  padding: 8px 10px;
+  border-radius: 10px;
+  cursor: pointer;
+  color: var(--md-on-surface);
+  font-family: inherit;
+  font-size: 14px;
+  text-align: left;
+  transition: background-color 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.theme-switcher__option:hover {
+  background-color: var(--md-surface-container-highest);
+}
+
+.theme-switcher__option:active {
+  background-color: var(--md-surface-container-highest);
+}
+
+.theme-switcher__option:focus-visible {
+  outline: 2px solid var(--md-primary);
+  outline-offset: -2px;
+}
+
+.theme-switcher__option[aria-pressed="true"] {
+  background-color: var(--md-surface-container-highest);
 }
 
 .theme-switcher__swatch {
-  width: 22px;
-  height: 22px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   border: 2px solid transparent;
-  cursor: pointer;
-  padding: 0;
-  outline: none;
-  transition: transform 0.15s ease, border-color 0.15s ease;
+  flex-shrink: 0;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-.theme-switcher__swatch:hover {
-  transform: scale(1.1);
-}
-
-.theme-switcher__swatch:focus-visible {
+.theme-switcher__option[aria-pressed="true"] .theme-switcher__swatch {
   border-color: var(--md-on-surface);
+  box-shadow: 0 0 0 2px var(--md-surface-container-highest) inset;
 }
 
-.theme-switcher__swatch[aria-pressed="true"] {
-  border-color: var(--md-on-surface);
+.theme-switcher__label {
+  flex: 1;
 }
 
 .theme-switcher__swatch--a { background-color: #FFB877; }
