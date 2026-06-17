@@ -160,7 +160,6 @@ function MiniPlayer({ station, isPlaying, onPlayPause, visible }) {
   )
 }
 
-const MAX_RETRIES = 5
 const MAX_BACKOFF_MS = 30000
 
 export default function App() {
@@ -194,40 +193,69 @@ export default function App() {
     const audio = audioRef.current
     if (!audio) return
 
+    // Reload the stream and resume. Used for both error/stall recovery and
+    // the "network/app is back" signals. The retry counter only drives the
+    // backoff delay — it never stops us from trying while the user wants audio.
     function retry() {
-      if (!isPlayingRef.current || retryCountRef.current >= MAX_RETRIES) return
+      if (!isPlayingRef.current) return
       retryCountRef.current += 1
       audio.load()
       audio.play().catch(() => {})
     }
 
     function schedule(baseMs) {
-      if (!isPlayingRef.current || retryCountRef.current >= MAX_RETRIES) return
+      if (!isPlayingRef.current) return
       clearTimeout(retryTimeoutRef.current)
       const delay = Math.min(baseMs * 2 ** retryCountRef.current, MAX_BACKOFF_MS)
       retryTimeoutRef.current = setTimeout(retry, delay)
     }
 
+    // Strong "connection should be available again" signals: retry promptly and
+    // reset the backoff so we don't sit in a 30s wait after a brief AP switch.
+    function reconnect() {
+      if (!isPlayingRef.current) return
+      retryCountRef.current = 0
+      clearTimeout(retryTimeoutRef.current)
+      retryTimeoutRef.current = setTimeout(retry, 500)
+    }
+
     const handleError = () => schedule(2000)
     const handleStalled = () => schedule(3000)
-    const handlePlaying = () => { retryCountRef.current = 0 }
-    const handleOnline = () => schedule(1000)
+    const handleWaiting = () => schedule(3000)
+    const handlePlaying = () => {
+      // Playback recovered on its own — cancel any pending retry so we don't
+      // needlessly reload the stream mid-buffer, and reset the backoff.
+      retryCountRef.current = 0
+      clearTimeout(retryTimeoutRef.current)
+    }
+    const handleOnline = () => reconnect()
     const handleNativePlay = () => setIsPlaying(true)
     const handleNativePause = () => setIsPlaying(false)
+    const handleVisibility = () => {
+      // Mobile browsers suspend background audio; when the user returns and
+      // playback is stuck (not actually progressing), kick a reconnect.
+      if (document.visibilityState === 'visible' && isPlayingRef.current && audio.paused) {
+        reconnect()
+      }
+    }
 
     audio.addEventListener('error', handleError)
     audio.addEventListener('stalled', handleStalled)
+    audio.addEventListener('waiting', handleWaiting)
     audio.addEventListener('playing', handlePlaying)
     audio.addEventListener('play', handleNativePlay)
     audio.addEventListener('pause', handleNativePause)
     window.addEventListener('online', handleOnline)
+    document.addEventListener('visibilitychange', handleVisibility)
     return () => {
       audio.removeEventListener('error', handleError)
       audio.removeEventListener('stalled', handleStalled)
+      audio.removeEventListener('waiting', handleWaiting)
       audio.removeEventListener('playing', handlePlaying)
       audio.removeEventListener('play', handleNativePlay)
       audio.removeEventListener('pause', handleNativePause)
       window.removeEventListener('online', handleOnline)
+      document.removeEventListener('visibilitychange', handleVisibility)
       clearTimeout(retryTimeoutRef.current)
     }
   }, [])
