@@ -1,390 +1,54 @@
-import { useRef, useState, useEffect, useCallback, memo } from 'react'
 import './App.css'
 import { stations } from './data/stations.js'
-import lunaremLogo from './assets/lunarem_radio_light.svg'
-
-function WaveAnimation() {
-  return (
-    <div className="wave" aria-hidden="true">
-      <span /><span /><span /><span />
-    </div>
-  )
-}
-
-function IconPlay() {
-  return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-      <path d="M8 5v14l11-7z" />
-    </svg>
-  )
-}
-
-function IconPause() {
-  return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-      <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
-    </svg>
-  )
-}
-
-function IconSettings() {
-  return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-      <path d="M19.14 12.94a7.43 7.43 0 0 0 .05-.94 7.43 7.43 0 0 0-.05-.94l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.61-.22l-2.39.96a7 7 0 0 0-1.62-.94l-.36-2.54a.5.5 0 0 0-.5-.42h-3.84a.5.5 0 0 0-.5.42l-.36 2.54c-.59.24-1.13.55-1.62.94l-2.39-.96a.5.5 0 0 0-.61.22L2.66 8.84a.5.5 0 0 0 .12.64l2.03 1.58a7.43 7.43 0 0 0-.05.94c0 .32.02.63.05.94l-2.03 1.58a.5.5 0 0 0-.12.64l1.92 3.32a.5.5 0 0 0 .61.22l2.39-.96c.49.39 1.03.7 1.62.94l.36 2.54a.5.5 0 0 0 .5.42h3.84a.5.5 0 0 0 .5-.42l.36-2.54c.59-.24 1.13-.55 1.62-.94l2.39.96a.5.5 0 0 0 .61-.22l1.92-3.32a.5.5 0 0 0-.12-.64l-2.03-1.58zM12 15.5A3.5 3.5 0 1 1 12 8.5a3.5 3.5 0 0 1 0 7z" />
-    </svg>
-  )
-}
-
-
-const StationCard = memo(function StationCard({ station, isActive, isPlaying, onSelect }) {
-  return (
-    <div
-      className={`station-card${isActive ? ' active' : ''}`}
-      onClick={() => onSelect(station)}
-      role="button"
-      tabIndex={0}
-      onKeyDown={e => e.key === 'Enter' && onSelect(station)}
-      aria-label={`Play ${station.name}`}
-    >
-      <div className="station-thumb">
-        <img src={station.logoUrl} alt={station.name} loading="lazy" decoding="async" />
-        {isPlaying && (
-          <div className="station-thumb__overlay">
-            <WaveAnimation />
-          </div>
-        )}
-      </div>
-      <div className="station-info">
-        <p className="station-name">{station.name}</p>
-      </div>
-    </div>
-  )
-})
-
-const THEMES = [
-  { id: 'a', name: 'Warm Amber' },
-  { id: 'b', name: 'Cool Teal' },
-  { id: 'c', name: 'Refined Violet' },
-  { id: 'd', name: 'Forest Sage' },
-  { id: 'e', name: 'Dusty Rose' },
-  { id: 'f', name: 'Midnight Steel' },
-]
-const THEME_IDS = THEMES.map(t => t.id)
-
-function ThemeSwitcher({ theme, onChange }) {
-  return (
-    <div className="theme-switcher" role="group" aria-label="Color theme">
-      {THEMES.map(t => (
-        <button
-          key={t.id}
-          type="button"
-          className="theme-switcher__option"
-          aria-pressed={theme === t.id}
-          onClick={() => onChange(t.id)}
-        >
-          <span className={`theme-switcher__swatch theme-switcher__swatch--${t.id}`} aria-hidden="true" />
-          <span className="theme-switcher__label">{t.name}</span>
-        </button>
-      ))}
-    </div>
-  )
-}
-
-const SettingsPopover = memo(function SettingsPopover({ theme, onThemeChange }) {
-  const [open, setOpen] = useState(false)
-  const containerRef = useRef(null)
-
-  useEffect(() => {
-    if (!open) return
-    function handleDocClick(e) {
-      if (containerRef.current && !containerRef.current.contains(e.target)) {
-        setOpen(false)
-      }
-    }
-    function handleKey(e) {
-      if (e.key === 'Escape') setOpen(false)
-    }
-    document.addEventListener('mousedown', handleDocClick)
-    document.addEventListener('keydown', handleKey)
-    return () => {
-      document.removeEventListener('mousedown', handleDocClick)
-      document.removeEventListener('keydown', handleKey)
-    }
-  }, [open])
-
-  return (
-    <div className="settings" ref={containerRef}>
-      <button
-        type="button"
-        className="settings__trigger"
-        aria-label="Settings"
-        aria-haspopup="dialog"
-        aria-expanded={open}
-        onClick={() => setOpen(o => !o)}
-      >
-        <IconSettings />
-      </button>
-      {open && (
-        <div className="settings__popover" role="dialog" aria-label="Settings">
-          <p className="settings__label">Theme</p>
-          <ThemeSwitcher theme={theme} onChange={onThemeChange} />
-        </div>
-      )}
-    </div>
-  )
-})
-
-const MiniPlayer = memo(function MiniPlayer({ station, isPlaying, onPlayPause, visible }) {
-  if (!station) return null
-
-  return (
-    <div className={`mini-player${visible ? ' mini-player--visible' : ' mini-player--hidden'}`}>
-      <div className="mini-player__thumb">
-        <img src={station.logoUrl} alt={station.name} loading="lazy" decoding="async" />
-      </div>
-      <div className="mini-player__meta">
-        <p className="mini-player__name">{station.name}</p>
-        <p className="mini-player__status">{isPlaying ? 'Live' : 'Paused'}</p>
-      </div>
-      {isPlaying && <WaveAnimation />}
-      <div className="mini-player__controls">
-        <button
-          className="fab"
-          onClick={onPlayPause}
-          aria-label={isPlaying ? 'Pause' : 'Play'}
-        >
-          {isPlaying ? <IconPause /> : <IconPlay />}
-        </button>
-      </div>
-    </div>
-  )
-})
-
-const MAX_BACKOFF_MS = 30000
+import { useTheme } from './hooks/useTheme.js'
+import { useAudioPlayer } from './hooks/useAudioPlayer.js'
+import { useMediaSession } from './hooks/useMediaSession.js'
+import AppBar from './components/AppBar.jsx'
+import StationGrid from './components/StationGrid.jsx'
+import MiniPlayer from './components/MiniPlayer.jsx'
 
 export default function App() {
-  const [currentStation, setCurrentStation] = useState(null)
-  const [isPlaying, setIsPlaying] = useState(false)
-  const [theme, setTheme] = useState(() => {
-    const stored = typeof window !== 'undefined' && localStorage.getItem('theme')
-    return THEME_IDS.includes(stored) ? stored : 'b'
+  const [theme, setTheme] = useTheme()
+  const {
+    currentStation,
+    isPlaying,
+    audioRef,
+    selectStation,
+    togglePlayPause,
+    play,
+    pause,
+    playNext,
+    playPrev,
+  } = useAudioPlayer(stations)
+
+  useMediaSession({
+    station: currentStation,
+    isPlaying,
+    onPlay: play,
+    onPause: pause,
+    onNext: playNext,
+    onPrev: playPrev,
   })
-  const audioRef = useRef(null)
-  const retryTimeoutRef = useRef(null)
-  const retryCountRef = useRef(0)
-  const isPlayingRef = useRef(false)
-  const currentStationRef = useRef(null)
-  // True while we are programmatically swapping the stream (src/load/play).
-  // load() fires a native `pause` event we must ignore, or the UI flickers
-  // Live→Paused→Live on station change.
-  const transitioningRef = useRef(false)
-
-  useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme)
-    localStorage.setItem('theme', theme)
-  }, [theme])
-
-  useEffect(() => {
-    isPlayingRef.current = isPlaying
-  }, [isPlaying])
-
-  useEffect(() => {
-    currentStationRef.current = currentStation
-  }, [currentStation])
-
-  useEffect(() => {
-    const audio = audioRef.current
-    if (!audio) return
-
-    // Reload the stream and resume. Used for both error/stall recovery and
-    // the "network/app is back" signals. The retry counter only drives the
-    // backoff delay — it never stops us from trying while the user wants audio.
-    function retry() {
-      if (!isPlayingRef.current) return
-      retryCountRef.current += 1
-      audio.load()
-      audio.play().catch(() => {})
-    }
-
-    function schedule(baseMs) {
-      if (!isPlayingRef.current) return
-      clearTimeout(retryTimeoutRef.current)
-      const delay = Math.min(baseMs * 2 ** retryCountRef.current, MAX_BACKOFF_MS)
-      retryTimeoutRef.current = setTimeout(retry, delay)
-    }
-
-    // Strong "connection should be available again" signals: retry promptly and
-    // reset the backoff so we don't sit in a 30s wait after a brief AP switch.
-    function reconnect() {
-      if (!isPlayingRef.current) return
-      retryCountRef.current = 0
-      clearTimeout(retryTimeoutRef.current)
-      retryTimeoutRef.current = setTimeout(retry, 500)
-    }
-
-    const handleError = () => {
-      // A transition that errors before `playing` fires must still clear the
-      // guard, or a genuine user pause during the failure would be swallowed.
-      transitioningRef.current = false
-      schedule(2000)
-    }
-    const handleStalled = () => schedule(3000)
-    const handleWaiting = () => schedule(3000)
-    const handlePlaying = () => {
-      // Playback recovered on its own — cancel any pending retry so we don't
-      // needlessly reload the stream mid-buffer, and reset the backoff.
-      transitioningRef.current = false
-      retryCountRef.current = 0
-      clearTimeout(retryTimeoutRef.current)
-    }
-    const handleOnline = () => reconnect()
-    const handleNativePlay = () => setIsPlaying(true)
-    const handleNativePause = () => {
-      // Ignore the `pause` event the load() algorithm fires during a
-      // programmatic stream swap; real OS/headphone pauses happen outside one.
-      if (transitioningRef.current) return
-      setIsPlaying(false)
-    }
-    const handleVisibility = () => {
-      // Mobile browsers suspend background audio; when the user returns and
-      // playback is stuck (not actually progressing), kick a reconnect.
-      if (document.visibilityState === 'visible' && isPlayingRef.current && audio.paused) {
-        reconnect()
-      }
-    }
-
-    audio.addEventListener('error', handleError)
-    audio.addEventListener('stalled', handleStalled)
-    audio.addEventListener('waiting', handleWaiting)
-    audio.addEventListener('playing', handlePlaying)
-    audio.addEventListener('play', handleNativePlay)
-    audio.addEventListener('pause', handleNativePause)
-    window.addEventListener('online', handleOnline)
-    document.addEventListener('visibilitychange', handleVisibility)
-    return () => {
-      audio.removeEventListener('error', handleError)
-      audio.removeEventListener('stalled', handleStalled)
-      audio.removeEventListener('waiting', handleWaiting)
-      audio.removeEventListener('playing', handlePlaying)
-      audio.removeEventListener('play', handleNativePlay)
-      audio.removeEventListener('pause', handleNativePause)
-      window.removeEventListener('online', handleOnline)
-      document.removeEventListener('visibilitychange', handleVisibility)
-      clearTimeout(retryTimeoutRef.current)
-    }
-  }, [])
-
-  useEffect(() => {
-    if (!currentStation || !audioRef.current) return
-    retryCountRef.current = 0
-    transitioningRef.current = true
-    audioRef.current.src = currentStation.streamUrl
-    audioRef.current.load()
-    audioRef.current.play().catch(() => {})
-  }, [currentStation])
-
-  useEffect(() => {
-    if (!audioRef.current) return
-    if (isPlaying) {
-      // The station-change effect already issued src+load+play for this swap;
-      // skip the duplicate play() that would race the load() and log an AbortError.
-      if (transitioningRef.current) return
-      audioRef.current.play().catch(() => {})
-    } else {
-      audioRef.current.pause()
-      clearTimeout(retryTimeoutRef.current)
-      retryCountRef.current = 0
-    }
-  }, [isPlaying])
-
-  const handleSelectStation = useCallback(station => {
-    if (station.id === currentStationRef.current?.id) {
-      setIsPlaying(p => !p)
-    } else {
-      setCurrentStation(station)
-      setIsPlaying(true)
-    }
-  }, [])
-
-  const handlePlayPause = useCallback(() => {
-    setIsPlaying(p => !p)
-  }, [])
-
-  const handleNext = useCallback(() => {
-    const cur = currentStationRef.current
-    const i = cur ? stations.findIndex(s => s.id === cur.id) : -1
-    const next = stations[(i + 1 + stations.length) % stations.length]
-    handleSelectStation(next)
-  }, [handleSelectStation])
-
-  const handlePrev = useCallback(() => {
-    const cur = currentStationRef.current
-    const i = cur ? stations.findIndex(s => s.id === cur.id) : 0
-    const prev = stations[(i - 1 + stations.length) % stations.length]
-    handleSelectStation(prev)
-  }, [handleSelectStation])
-
-  useEffect(() => {
-    if (!('mediaSession' in navigator)) return
-    const ms = navigator.mediaSession
-    ms.setActionHandler('play', () => setIsPlaying(true))
-    ms.setActionHandler('pause', () => setIsPlaying(false))
-    ms.setActionHandler('previoustrack', () => handlePrev())
-    ms.setActionHandler('nexttrack', () => handleNext())
-    return () => {
-      ms.setActionHandler('play', null)
-      ms.setActionHandler('pause', null)
-      ms.setActionHandler('previoustrack', null)
-      ms.setActionHandler('nexttrack', null)
-    }
-  }, [handleNext, handlePrev])
-
-  useEffect(() => {
-    if (!('mediaSession' in navigator) || !('MediaMetadata' in window)) return
-    navigator.mediaSession.metadata = currentStation
-      ? new MediaMetadata({
-          title: currentStation.name,
-          artist: 'Lunarem Radio',
-          artwork: [{ src: currentStation.logoUrl }],
-        })
-      : null
-  }, [currentStation])
-
-  useEffect(() => {
-    if (!('mediaSession' in navigator)) return
-    navigator.mediaSession.playbackState = currentStation
-      ? (isPlaying ? 'playing' : 'paused')
-      : 'none'
-  }, [currentStation, isPlaying])
 
   return (
     <>
       <audio ref={audioRef} preload="none" />
 
-      <header className="app-bar">
-        <img src={lunaremLogo} alt="Lunarem Radio" className="app-bar__logo" />
-        <h1 className="app-bar__title">Lunarem Radio</h1>
-        <SettingsPopover theme={theme} onThemeChange={setTheme} />
-      </header>
+      <AppBar theme={theme} onThemeChange={setTheme} />
 
       <main className="app-main">
-        <div className="station-grid">
-          {stations.map(station => (
-            <StationCard
-              key={station.id}
-              station={station}
-              isActive={currentStation?.id === station.id}
-              isPlaying={currentStation?.id === station.id && isPlaying}
-              onSelect={handleSelectStation}
-            />
-          ))}
-        </div>
+        <StationGrid
+          stations={stations}
+          currentStation={currentStation}
+          isPlaying={isPlaying}
+          onSelect={selectStation}
+        />
       </main>
 
       <MiniPlayer
         station={currentStation}
         isPlaying={isPlaying}
-        onPlayPause={handlePlayPause}
+        onPlayPause={togglePlayPause}
         visible={!!currentStation}
       />
     </>
