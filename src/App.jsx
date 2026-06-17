@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from 'react'
+import { useRef, useState, useEffect, useCallback, memo } from 'react'
 import './App.css'
 import { stations } from './data/stations.js'
 import lunaremLogo from './assets/lunarem_radio_light.svg'
@@ -36,7 +36,7 @@ function IconSettings() {
 }
 
 
-function StationCard({ station, isActive, isPlaying, onSelect }) {
+const StationCard = memo(function StationCard({ station, isActive, isPlaying, onSelect }) {
   return (
     <div
       className={`station-card${isActive ? ' active' : ''}`}
@@ -59,7 +59,7 @@ function StationCard({ station, isActive, isPlaying, onSelect }) {
       </div>
     </div>
   )
-}
+})
 
 const THEMES = [
   { id: 'a', name: 'Warm Amber' },
@@ -90,7 +90,7 @@ function ThemeSwitcher({ theme, onChange }) {
   )
 }
 
-function SettingsPopover({ theme, onThemeChange }) {
+const SettingsPopover = memo(function SettingsPopover({ theme, onThemeChange }) {
   const [open, setOpen] = useState(false)
   const containerRef = useRef(null)
 
@@ -132,9 +132,9 @@ function SettingsPopover({ theme, onThemeChange }) {
       )}
     </div>
   )
-}
+})
 
-function MiniPlayer({ station, isPlaying, onPlayPause, visible }) {
+const MiniPlayer = memo(function MiniPlayer({ station, isPlaying, onPlayPause, visible }) {
   if (!station) return null
 
   return (
@@ -158,7 +158,7 @@ function MiniPlayer({ station, isPlaying, onPlayPause, visible }) {
       </div>
     </div>
   )
-}
+})
 
 const MAX_BACKOFF_MS = 30000
 
@@ -174,7 +174,6 @@ export default function App() {
   const retryCountRef = useRef(0)
   const isPlayingRef = useRef(false)
   const currentStationRef = useRef(null)
-  const handlersRef = useRef({ handleNext: () => {}, handlePrev: () => {} })
   // True while we are programmatically swapping the stream (src/load/play).
   // load() fires a native `pause` event we must ignore, or the UI flickers
   // Live→Paused→Live on station change.
@@ -287,6 +286,9 @@ export default function App() {
   useEffect(() => {
     if (!audioRef.current) return
     if (isPlaying) {
+      // The station-change effect already issued src+load+play for this swap;
+      // skip the duplicate play() that would race the load() and log an AbortError.
+      if (transitioningRef.current) return
       audioRef.current.play().catch(() => {})
     } else {
       audioRef.current.pause()
@@ -295,51 +297,47 @@ export default function App() {
     }
   }, [isPlaying])
 
-  function handleSelectStation(station) {
-    if (station.id === currentStation?.id) {
+  const handleSelectStation = useCallback(station => {
+    if (station.id === currentStationRef.current?.id) {
       setIsPlaying(p => !p)
     } else {
       setCurrentStation(station)
       setIsPlaying(true)
     }
-  }
+  }, [])
 
-  function handlePlayPause() {
+  const handlePlayPause = useCallback(() => {
     setIsPlaying(p => !p)
-  }
+  }, [])
 
-  function handleNext() {
+  const handleNext = useCallback(() => {
     const cur = currentStationRef.current
     const i = cur ? stations.findIndex(s => s.id === cur.id) : -1
     const next = stations[(i + 1 + stations.length) % stations.length]
     handleSelectStation(next)
-  }
+  }, [handleSelectStation])
 
-  function handlePrev() {
+  const handlePrev = useCallback(() => {
     const cur = currentStationRef.current
     const i = cur ? stations.findIndex(s => s.id === cur.id) : 0
     const prev = stations[(i - 1 + stations.length) % stations.length]
     handleSelectStation(prev)
-  }
-
-  useEffect(() => {
-    handlersRef.current = { handleNext, handlePrev }
-  })
+  }, [handleSelectStation])
 
   useEffect(() => {
     if (!('mediaSession' in navigator)) return
     const ms = navigator.mediaSession
     ms.setActionHandler('play', () => setIsPlaying(true))
     ms.setActionHandler('pause', () => setIsPlaying(false))
-    ms.setActionHandler('previoustrack', () => handlersRef.current.handlePrev())
-    ms.setActionHandler('nexttrack', () => handlersRef.current.handleNext())
+    ms.setActionHandler('previoustrack', () => handlePrev())
+    ms.setActionHandler('nexttrack', () => handleNext())
     return () => {
       ms.setActionHandler('play', null)
       ms.setActionHandler('pause', null)
       ms.setActionHandler('previoustrack', null)
       ms.setActionHandler('nexttrack', null)
     }
-  }, [])
+  }, [handleNext, handlePrev])
 
   useEffect(() => {
     if (!('mediaSession' in navigator) || !('MediaMetadata' in window)) return
