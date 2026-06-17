@@ -179,10 +179,6 @@ export default function App() {
   const handlersRef = useRef({ handleNext: () => {}, handlePrev: () => {} })
 
   useEffect(() => {
-    if (autoplayFirst) sessionStorage.removeItem('autoplayFirst')
-  }, [])
-
-  useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme)
     localStorage.setItem('theme', theme)
   }, [theme])
