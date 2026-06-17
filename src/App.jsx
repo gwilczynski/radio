@@ -164,9 +164,8 @@ const MAX_RETRIES = 5
 const MAX_BACKOFF_MS = 30000
 
 export default function App() {
-  const autoplayFirst = typeof window !== 'undefined' && sessionStorage.getItem('autoplayFirst') === '1'
-  const [currentStation, setCurrentStation] = useState(() => (autoplayFirst ? stations[0] ?? null : null))
-  const [isPlaying, setIsPlaying] = useState(autoplayFirst)
+  const [currentStation, setCurrentStation] = useState(null)
+  const [isPlaying, setIsPlaying] = useState(false)
   const [theme, setTheme] = useState(() => {
     const stored = typeof window !== 'undefined' && localStorage.getItem('theme')
     return THEME_IDS.includes(stored) ? stored : 'b'
@@ -268,12 +267,8 @@ export default function App() {
   function handleNext() {
     const cur = currentStationRef.current
     const i = cur ? stations.findIndex(s => s.id === cur.id) : -1
-    if (i >= stations.length - 1) {
-      sessionStorage.setItem('autoplayFirst', '1')
-      window.location.reload()
-      return
-    }
-    handleSelectStation(stations[i + 1])
+    const next = stations[(i + 1 + stations.length) % stations.length]
+    handleSelectStation(next)
   }
 
   function handlePrev() {
