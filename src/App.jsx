@@ -175,6 +175,10 @@ export default function App() {
   const isPlayingRef = useRef(false)
   const currentStationRef = useRef(null)
   const handlersRef = useRef({ handleNext: () => {}, handlePrev: () => {} })
+  // True while we are programmatically swapping the stream (src/load/play).
+  // load() fires a native `pause` event we must ignore, or the UI flickers
+  // Live→Paused→Live on station change.
+  const transitioningRef = useRef(false)
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme)
@@ -219,18 +223,29 @@ export default function App() {
       retryTimeoutRef.current = setTimeout(retry, 500)
     }
 
-    const handleError = () => schedule(2000)
+    const handleError = () => {
+      // A transition that errors before `playing` fires must still clear the
+      // guard, or a genuine user pause during the failure would be swallowed.
+      transitioningRef.current = false
+      schedule(2000)
+    }
     const handleStalled = () => schedule(3000)
     const handleWaiting = () => schedule(3000)
     const handlePlaying = () => {
       // Playback recovered on its own — cancel any pending retry so we don't
       // needlessly reload the stream mid-buffer, and reset the backoff.
+      transitioningRef.current = false
       retryCountRef.current = 0
       clearTimeout(retryTimeoutRef.current)
     }
     const handleOnline = () => reconnect()
     const handleNativePlay = () => setIsPlaying(true)
-    const handleNativePause = () => setIsPlaying(false)
+    const handleNativePause = () => {
+      // Ignore the `pause` event the load() algorithm fires during a
+      // programmatic stream swap; real OS/headphone pauses happen outside one.
+      if (transitioningRef.current) return
+      setIsPlaying(false)
+    }
     const handleVisibility = () => {
       // Mobile browsers suspend background audio; when the user returns and
       // playback is stuck (not actually progressing), kick a reconnect.
@@ -263,6 +278,7 @@ export default function App() {
   useEffect(() => {
     if (!currentStation || !audioRef.current) return
     retryCountRef.current = 0
+    transitioningRef.current = true
     audioRef.current.src = currentStation.streamUrl
     audioRef.current.load()
     audioRef.current.play().catch(() => {})
@@ -326,19 +342,21 @@ export default function App() {
   }, [])
 
   useEffect(() => {
+    if (!('mediaSession' in navigator) || !('MediaMetadata' in window)) return
+    navigator.mediaSession.metadata = currentStation
+      ? new MediaMetadata({
+          title: currentStation.name,
+          artist: 'Lunarem Radio',
+          artwork: [{ src: currentStation.logoUrl }],
+        })
+      : null
+  }, [currentStation])
+
+  useEffect(() => {
     if (!('mediaSession' in navigator)) return
-    const ms = navigator.mediaSession
-    if (currentStation) {
-      ms.metadata = new MediaMetadata({
-        title: currentStation.name,
-        artist: 'Lunarem Radio',
-        artwork: [{ src: currentStation.logoUrl }],
-      })
-      ms.playbackState = isPlaying ? 'playing' : 'paused'
-    } else {
-      ms.metadata = null
-      ms.playbackState = 'none'
-    }
+    navigator.mediaSession.playbackState = currentStation
+      ? (isPlaying ? 'playing' : 'paused')
+      : 'none'
   }, [currentStation, isPlaying])
 
   return (
