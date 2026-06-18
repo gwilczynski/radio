@@ -37,7 +37,8 @@ export function useAudioPlayer(stations) {
     function retry() {
       if (!isPlayingRef.current) return
       retryCountRef.current += 1
-      audio.load()
+      transitioningRef.current = true   // load() fires a native `pause`; don't let
+      audio.load()                      // handleNativePause mistake it for a real pause
       audio.play().catch(() => {})
     }
 
@@ -122,8 +123,13 @@ export function useAudioPlayer(stations) {
     if (!audioRef.current) return
     if (isPlaying) {
       // The station-change effect already issued src+load+play for this swap;
-      // skip the duplicate play() that would race the load() and log an AbortError.
+      // skip the duplicate that would race its load() and log an AbortError.
       if (transitioningRef.current) return
+      // Resuming a live stream: reload instead of resuming the stale buffer that
+      // built up while paused, so we play current audio and don't stall when the
+      // (likely dropped) connection's buffer drains.
+      transitioningRef.current = true
+      audioRef.current.load()
       audioRef.current.play().catch(() => {})
     } else {
       audioRef.current.pause()
