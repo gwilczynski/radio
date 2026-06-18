@@ -2,6 +2,14 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 
 const MAX_BACKOFF_MS = 30000
 
+// play() rejects with AbortError whenever a newer load()/play() interrupts a
+// pending one — that's our own stream-swap doing its job, not a failure. Log
+// every other rejection so playback errors always surface in the console.
+function logPlayError(err) {
+  if (err?.name === 'AbortError') return
+  console.error('[audio] play() failed:', err)
+}
+
 // Owns the single <audio> element (via the returned ref) and all playback
 // state: which station is selected, whether it is playing, and the
 // error/stall/reconnect recovery loop. Pass the station list so next/prev can
@@ -39,7 +47,7 @@ export function useAudioPlayer(stations) {
       retryCountRef.current += 1
       transitioningRef.current = true   // load() fires a native `pause`; don't let
       audio.load()                      // handleNativePause mistake it for a real pause
-      audio.play().catch(() => {})
+      audio.play().catch(logPlayError)
     }
 
     function schedule(baseMs) {
@@ -59,6 +67,12 @@ export function useAudioPlayer(stations) {
     }
 
     const handleError = () => {
+      const mediaError = audio.error
+      console.error(
+        `[audio] stream error for "${currentStationRef.current?.name ?? 'unknown'}":`,
+        mediaError ? `code ${mediaError.code} — ${mediaError.message || 'no message'}` : 'unknown error',
+        audio.currentSrc || audio.src,
+      )
       // A transition that errors before `playing` fires must still clear the
       // guard, or a genuine user pause during the failure would be swallowed.
       transitioningRef.current = false
@@ -116,7 +130,7 @@ export function useAudioPlayer(stations) {
     transitioningRef.current = true
     audioRef.current.src = currentStation.streamUrl
     audioRef.current.load()
-    audioRef.current.play().catch(() => {})
+    audioRef.current.play().catch(logPlayError)
   }, [currentStation])
 
   useEffect(() => {
@@ -130,7 +144,7 @@ export function useAudioPlayer(stations) {
       // (likely dropped) connection's buffer drains.
       transitioningRef.current = true
       audioRef.current.load()
-      audioRef.current.play().catch(() => {})
+      audioRef.current.play().catch(logPlayError)
     } else {
       audioRef.current.pause()
       clearTimeout(retryTimeoutRef.current)
